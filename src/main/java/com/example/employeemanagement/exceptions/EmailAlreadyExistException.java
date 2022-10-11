@@ -1,7 +1,7 @@
 package com.example.employeemanagement.exceptions;
 
-public class EmailAlreadyExist extends RuntimeException {
-    public EmailAlreadyExist(String message) {
+public class EmailAlreadyExistException extends RuntimeException {
+    public EmailAlreadyExistException(String message) {
         super(message);
     }
 }

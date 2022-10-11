@@ -1,2 +1,5 @@
-package com.example.employeemanagement.enums;public enum Role {
+package com.example.employeemanagement.enums;
+
+public enum Role {
+    ADMIN, EMPLOYEE
 }

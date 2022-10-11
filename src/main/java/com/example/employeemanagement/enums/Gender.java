@@ -1,2 +1,5 @@
-package com.example.employeemanagement.enums;public enum Gender {
+package com.example.employeemanagement.enums;
+
+public enum Gender {
+    FEMALE, MALE
 }
