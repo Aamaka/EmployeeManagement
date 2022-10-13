@@ -9,6 +9,7 @@ import com.example.employeemanagement.dtos.response.AdminRegistrationResponse;
 import com.example.employeemanagement.dtos.response.LoginAdminResponse;
 import com.example.employeemanagement.exceptions.EmailAlreadyExistException;
 import com.example.employeemanagement.exceptions.EmailDoesNotExistException;
+import com.example.employeemanagement.exceptions.InvalidSyntaxException;
 import com.example.employeemanagement.exceptions.PasswordMismatchException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.example.employeemanagement.validation.ValidateEmail.validateEmail;
 
 @Service
 public class AdminServiceImpl implements AdminService, UserDetailsService {
@@ -36,15 +39,18 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
     public AdminRegistrationResponse register(AdminRegistrationRequest request) {
         if(adminRepository.existsByEmail(request.getEmail())) throw new EmailAlreadyExistException("you already have " +
                 "an account with this email");
-        Admin admin = modelMapper.map(request, Admin.class);
-        admin.setPassword(passwordEncoder.encode(request.getPassword()));
-        if(request.getPassword().equals(request.getConfirmPassword())){
-            Admin saved = adminRepository.save(admin);
-            return AdminRegistrationResponse.builder()
-                    .message("Registration was successful, welcome "+ saved.getName())
-                    .build();
+        if(validateEmail(request.getEmail())){
+            Admin admin = modelMapper.map(request, Admin.class);
+            admin.setPassword(passwordEncoder.encode(request.getPassword()));
+            if(request.getPassword().equals(request.getConfirmPassword())){
+                Admin saved = adminRepository.save(admin);
+                return AdminRegistrationResponse.builder()
+                        .message("Registration was successful, welcome "+ saved.getName())
+                        .build();
+            }
+            throw new PasswordMismatchException("password does not match");
         }
-        throw new PasswordMismatchException("password does not match");
+        throw new InvalidSyntaxException("Invalid email syntax ");
     }
 
     @Override

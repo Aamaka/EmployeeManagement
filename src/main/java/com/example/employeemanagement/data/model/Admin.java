@@ -19,7 +19,7 @@ public class Admin {
     private String name;
     private String address;
 
-    @Email
+
     @Column(unique = true)
     private String email;
 

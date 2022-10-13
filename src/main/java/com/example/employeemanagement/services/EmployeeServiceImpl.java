@@ -13,14 +13,18 @@ import com.example.employeemanagement.exceptions.*;
 import com.github.fge.jsonpatch.JsonPatch;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
+import static com.example.employeemanagement.validation.ValidateEmail.validateEmail;
+
 @Service
 @AllArgsConstructor
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl implements EmployeeService, UserDetailsService {
     private final EmploymentRepository employmentRepository;
     private final AdminRepository adminRepository;
 
@@ -38,23 +42,26 @@ public class EmployeeServiceImpl implements EmployeeService {
         if(admin.isPresent()){
             if(passwordEncoder.matches(request.getAdminPassword(), admin.get().getPassword())){
                 if(admin.get().getRole().equals(Role.ADMIN)){
-                    if(!employmentRepository.existsByEmail(request.getEmail())) {
+                    if(validateEmail(request.getEmail())){
+                        if(!employmentRepository.existsByEmail(request.getEmail())) {
+                            Employee employee = modelMapper.map(request, Employee.class);
 
-                        Employee employee = modelMapper.map(request, Employee.class);
-
-                        Employee employed = employmentRepository.save(employee);
-                        return RegisterEmployeeResponse.builder()
-                                .message(String.format("Successfully onboarded %s %s to the platform",
-                                        employed.getFirstName(), employed.getLastName()))
-                                .build();
+                            Employee employed = employmentRepository.save(employee);
+                            return RegisterEmployeeResponse.builder()
+                                    .message(String.format("Successfully onboarded %s %s to the platform",
+                                            employed.getFirstName(), employed.getLastName()))
+                                    .build();
+                        }
+                        throw new EmailAlreadyExistException("Employee already exist, make an update instead");
                     }
-                    throw new EmailAlreadyExistException("Employee already exist, make an update instead");
+                    throw new AccessException("Access not granted");
                 }
-                throw new AccessException("Access not granted");
+                throw new PasswordMismatchException("Incorrect password");
             }
-            throw new PasswordMismatchException("Incorrect password");
+            throw new EmailDoesNotExistException("Admin email does not exist");
         }
-        throw new EmailDoesNotExistException("Admin email does not exist");
+        throw new InvalidSyntaxException("Invalid email syntax");
+
     }
 
     @Override
@@ -72,4 +79,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<Employee> employee = employmentRepository.findEmployeeByEmail(username);
+        return null;
+    }
 }
