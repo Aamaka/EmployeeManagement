@@ -2,8 +2,10 @@ package com.example.employeemanagement.configuration;
 
 import com.example.employeemanagement.services.AdminServiceImpl;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,9 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
-@EnableWebSecurity
-@Deprecated
-public class Config extends WebMvcConfigurerAdapter {
+public class Config {
     @Bean
     public ModelMapper modelMapper(){
         return new ModelMapper();
@@ -42,7 +42,7 @@ public class Config extends WebMvcConfigurerAdapter {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf().disable()
-                .antMatcher("api/v1/admin/")
+                .antMatcher("/api/v1/employee/:id")
                 .authorizeRequests()
                 .anyRequest()
                 .authenticated()

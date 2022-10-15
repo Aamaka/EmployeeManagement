@@ -8,8 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 
 @Entity
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

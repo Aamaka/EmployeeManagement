@@ -11,6 +11,7 @@ import com.example.employeemanagement.exceptions.EmailAlreadyExistException;
 import com.example.employeemanagement.exceptions.EmailDoesNotExistException;
 import com.example.employeemanagement.exceptions.InvalidSyntaxException;
 import com.example.employeemanagement.exceptions.PasswordMismatchException;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
