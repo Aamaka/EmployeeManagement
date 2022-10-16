@@ -5,10 +5,10 @@ import com.example.employeemanagement.data.model.Employee;
 import com.example.employeemanagement.data.repositories.AdminRepository;
 import com.example.employeemanagement.data.repositories.EmploymentRepository;
 import com.example.employeemanagement.dtos.requests.RegisterEmployeeRequest;
-import com.example.employeemanagement.dtos.requests.UpdateEmployeeDetailsRequest;
 import com.example.employeemanagement.dtos.response.FindAllEmployeeResponse;
 import com.example.employeemanagement.dtos.response.RegisterEmployeeResponse;
 import com.example.employeemanagement.dtos.response.UpdateEmployeeDetailsResponse;
+import com.example.employeemanagement.enums.Department;
 import com.example.employeemanagement.enums.Role;
 import com.example.employeemanagement.exceptions.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,11 +23,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static com.example.employeemanagement.enums.Department.*;
 import static com.example.employeemanagement.validation.ValidateEmail.validateEmail;
 
 @Service
@@ -54,6 +55,14 @@ public class EmployeeServiceImpl implements EmployeeService, UserDetailsService 
                     if(validateEmail(request.getEmail())){
                         if(!employmentRepository.existsByEmail(request.getEmail())) {
                             Employee employee = modelMapper.map(request, Employee.class);
+                            String employeeId = String.valueOf(UUID.randomUUID().getMostSignificantBits());
+                            switch (employee.getDepartment()){
+                                case IT -> employeeId = employeeId.substring(1, 5)+"IT";
+                                case LOGISTIC -> employeeId = employeeId.substring(1, 5) + "LT";
+                                case PROCUREMENT -> employeeId = employeeId.substring(1, 5) + "PT";
+                            }
+
+                            employee.setEmployeeId(employeeId);
 
                             return getRegisterEmployeeResponse(employee);
                         }
@@ -74,6 +83,7 @@ public class EmployeeServiceImpl implements EmployeeService, UserDetailsService 
         return RegisterEmployeeResponse.builder()
                 .message(String.format("Successfully onboarded %s %s to the platform",
                         employed.getFirstName(), employed.getLastName()))
+                .id("Your id is: "+employed.getEmployeeId())
                 .build();
     }
 
@@ -102,16 +112,15 @@ public class EmployeeServiceImpl implements EmployeeService, UserDetailsService 
         List<FindAllEmployeeResponse> employeeResponses = new ArrayList<>();
         List<Employee> found =  employmentRepository.findAll();
         log.info(" Employees===> {}, {}", found, found.size());
-//        if(!found.isEmpty()){
-//            for (int i = 0; i < found.size(); i++) {
-//                FindAllEmployeeResponse response =  modelMapper.map(found, FindAllEmployeeResponse.class);
-//                employeeResponses.add(response);
-//            }
-//            return employeeResponses;
-//        }
         found.forEach(employee -> buildFindAllEmployeesResponse(employee, employeeResponses));
         return employeeResponses;
-//       throw new EmployeeNotFoundException("No Employee found");
+    }
+
+    @Override
+    public Employee findAnEmployee(String id) {
+        return employmentRepository.findEmployeeByEmployeeId(id).orElseThrow(()->
+              new EmployeeNotFoundException("Employee not found"));
+
     }
 
     private void buildFindAllEmployeesResponse(Employee employee, List<FindAllEmployeeResponse> employeeResponses){

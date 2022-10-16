@@ -18,4 +18,6 @@ public interface EmployeeService {
 
     List<FindAllEmployeeResponse> findAllEmployees();
 
+    Employee findAnEmployee(String id);
+
 }

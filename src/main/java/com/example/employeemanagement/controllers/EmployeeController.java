@@ -1,5 +1,6 @@
 package com.example.employeemanagement.controllers;
 
+import com.example.employeemanagement.data.model.Employee;
 import com.example.employeemanagement.dtos.requests.RegisterEmployeeRequest;
 import com.example.employeemanagement.dtos.response.FindAllEmployeeResponse;
 import com.example.employeemanagement.dtos.response.RegisterEmployeeResponse;
@@ -44,5 +45,10 @@ public class EmployeeController {
         } catch (JsonPatchException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/findAnEmployee/{id}")
+    public Employee findAnEmployee(@PathVariable String id){
+        return employeeService.findAnEmployee(id);
     }
 }
