@@ -8,7 +8,6 @@ import com.example.employeemanagement.dtos.requests.RegisterEmployeeRequest;
 import com.example.employeemanagement.dtos.response.FindAllEmployeeResponse;
 import com.example.employeemanagement.dtos.response.RegisterEmployeeResponse;
 import com.example.employeemanagement.dtos.response.UpdateEmployeeDetailsResponse;
-import com.example.employeemanagement.enums.Department;
 import com.example.employeemanagement.enums.Role;
 import com.example.employeemanagement.exceptions.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.example.employeemanagement.enums.Department.*;
 import static com.example.employeemanagement.validation.ValidateEmail.validateEmail;
 
 @Service
@@ -93,17 +90,13 @@ public class EmployeeServiceImpl implements EmployeeService, UserDetailsService 
         Employee employee = employmentRepository.findById(id).orElseThrow(()->
                 new EmployeeNotFoundException("employee not found"));
         JsonNode emp = objectMapper.convertValue(employee, JsonNode.class);
-        try {
-            JsonNode updatedNode = patch.apply(emp);
-            Employee employee1 = objectMapper.convertValue(updatedNode, Employee.class);
-            log.info("{}", employee1);
-            employmentRepository.save(employee1);
-            return UpdateEmployeeDetailsResponse.builder()
-                    .message("successful")
-                    .build();
-        } catch (JsonPatchException exception) {
-            throw exception;
-        }
+        JsonNode updatedNode = patch.apply(emp);
+        Employee employee1 = objectMapper.convertValue(updatedNode, Employee.class);
+        log.info("{}", employee1);
+        employmentRepository.save(employee1);
+        return UpdateEmployeeDetailsResponse.builder()
+                .message("successful")
+                .build();
 
     }
 

@@ -19,14 +19,13 @@ public class Employee {
     private String firstName;
     private String lastName;
     private String address;
-    private String employeeId;
 
+    @Column(unique = true)
+    private String employeeId;
     @Column(unique = true)
     private String email;
-
     @Column(unique = true)
     private String phoneNumber;
-
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
